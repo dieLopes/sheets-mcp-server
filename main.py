@@ -1,10 +1,14 @@
-from dotenv import load_dotenv
-from fastapi import FastAPI
-from routers import router
+import uvicorn
 
 
-load_dotenv()
+def main():
+    uvicorn.run(
+        app="app.app:app",
+        host="0.0.0.0",
+        port=8090,
+        reload=True,
+    )
 
-app = FastAPI("MCP Sheets Server")
 
-app.include_router(router.router)
+if __name__ == "__main__":
+    main()
