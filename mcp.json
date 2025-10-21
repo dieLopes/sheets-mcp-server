@@ -1,66 +1,103 @@
 {
-  "name": "mcp-openai-server",
+  "name": "Google Sheets MCP Server",
   "version": "1.0.0",
-  "description": "Servidor MCP que utiliza o OpenAI para interpretar linguagem natural e gerar comandos estruturados para manipular planilhas do Google Sheets.",
-  "contact_email": "seu-email@dominio.com",
-  "license": "MIT",
-  "author": "Diego Lopes",
-  "servers": [
-    {
-      "url": "http://localhost:8000",
-      "description": "Servidor local do mcp-openai-server"
-    }
-  ],
-  "tools": [
-    {
-      "name": "gerenciar_planilha_google",
-      "description": "Transforma instruções em linguagem natural em comandos JSON para manipular a planilha 'Financeiro_Mensal'.",
-      "type": "http",
-      "endpoint": "/message",
-      "method": "POST",
-      "input_schema": {
-        "type": "object",
-        "properties": {
-          "mensagem": {
-            "type": "string",
-            "description": "Mensagem em linguagem natural a ser interpretada e convertida em comando JSON."
-          }
-        },
-        "required": ["mensagem"]
+  "description": "Serviço MCP que manipula planilhas Google Sheets utilizando ações genéricas (read, write, update, delete).",
+  "server_url": "http://localhost:8090/execute",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["read", "write", "update", "delete"],
+        "description": "Tipo de operação a ser executada na planilha."
       },
-      "output_schema": {
-        "type": "object",
-        "properties": {
-          "comando": {
-            "type": "object",
-            "description": "Comando JSON estruturado gerado pelo OpenAI."
+      "tab": {
+        "type": "string",
+        "description": "Nome da aba (worksheet) dentro da planilha a ser manipulada."
+      },
+      "data": {
+        "type": ["array", "object", "null"],
+        "description": "Dados adicionais necessários dependendo da ação.",
+        "items": {
+          "type": "object",
+          "description": "Usado para inserir linhas ou atualizar células."
+        },
+        "examples": [
+          {
+            "action": "write",
+            "tab": "usuarios",
+            "data": [
+              { "nome": "Diego", "idade": 30 }
+            ]
           },
-          "resultado": {
-            "type": "object",
-            "description": "Resposta retornada pelo serviço de manipulação de planilha."
+          {
+            "action": "update",
+            "tab": "usuarios",
+            "data": { "row": 2, "col": 3, "value": "Atualizado" }
           },
-          "status": {
-            "type": "string",
-            "description": "Status da operação (sucesso, erro, etc.)"
-          },
-          "mensagem": {
-            "type": "string",
-            "description": "Mensagem descritiva em caso de erro."
+          {
+            "action": "delete",
+            "tab": "usuarios",
+            "data": { "row": 4 }
           }
-        }
+        ]
+      }
+    },
+    "required": ["action", "tab"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["ok", "error"],
+        "description": "Status da operação."
+      },
+      "message": {
+        "type": ["string", "null"],
+        "description": "Mensagem de retorno, caso aplicável."
+      },
+      "data": {
+        "type": ["array", "null"],
+        "description": "Lista de registros retornados para operações de leitura."
       }
     }
-  ],
-  "endpoints": [
+  },
+  "actions": [
     {
-      "path": "/message",
-      "method": "POST",
-      "description": "Recebe a mensagem do usuário, gera um comando JSON via OpenAI e envia ao serviço de planilha."
+      "name": "read",
+      "description": "Lê todos os registros de uma aba específica da planilha.",
+      "parameters": {
+        "tab": "string"
+      },
+      "returns": "Lista de registros (linhas da planilha)."
     },
     {
-      "path": "/mcp.json",
-      "method": "GET",
-      "description": "Retorna o manifesto MCP do servidor."
+      "name": "write",
+      "description": "Adiciona uma nova linha na planilha.",
+      "parameters": {
+        "tab": "string",
+        "data": "Lista de dicionários com os valores a serem inseridos."
+      },
+      "returns": "Mensagem de sucesso."
+    },
+    {
+      "name": "update",
+      "description": "Atualiza o valor de uma célula específica.",
+      "parameters": {
+        "tab": "string",
+        "data": "{ 'row': número da linha, 'col': número da coluna, 'value': novo valor }"
+      },
+      "returns": "Mensagem de sucesso."
+    },
+    {
+      "name": "delete",
+      "description": "Exclui uma linha da planilha.",
+      "parameters": {
+        "tab": "string",
+        "data": "{ 'row': número da linha }"
+      },
+      "returns": "Mensagem de sucesso."
     }
   ]
 }

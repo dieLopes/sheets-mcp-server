@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from app.routers import mcp, sheets
-from starlette.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     servers=[
-        {'url': 'http://localhost:8000', 'description': 'Local Server'}
+        {'url': 'http://localhost:8080', 'description': 'Local Server'}
     ]
 )
 
