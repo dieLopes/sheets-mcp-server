@@ -3,6 +3,8 @@
 Este projeto expõe um endpoint REST via *FastAPI* que permite executar ações em uma planilha do *Google Sheets*.  
 O acesso à planilha é feito com uma *Service Account* do Google Cloud utilizando credenciais no formato ⁠ credentials.json ⁠.
 
+O serviço tbm expoe um endpoint /mcp.json com o contrato dos endpoints
+
 ---
 
 ## 💡 O que é ⁠ credentials.json ⁠?
@@ -136,3 +138,12 @@ curl -X POST http://localhost:5000/executar \
 ## ⚠ Segurança
 Nunca exponha o credentials.json publicamente.
 Ajuste permissões da planilha para evitar acessos indesejados.
+
+### 📄 Manifesto MCP
+
+O manifesto mcp.json descreve o servidor, suas ferramentas e schemas.
+Exemplo de uso:
+
+```bash
+curl http://localhost:8000/mcp.json
+```
